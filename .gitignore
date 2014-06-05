@@ -1,0 +1,12 @@
+*.DS_STORE
+bench/
+driver/Module.symvers
+driver/smon.ko
+driver/smon.mod.c
+driver/smon.mod.o
+driver/modules.order
+driver/*.o
+driver/*.com
+driver/.*
+tool/bin/*
+tool/obj/*
