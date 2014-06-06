@@ -28,19 +28,20 @@ void smon_sample_write (struct smon_ring_buffer *rb, int type, void *sample )
  */
 void smon_sample_start (struct smon_task *task)
 {
-	struct smon_evset *evset = smon_get_evset(task->evset);
+	struct smon_evset *evset = smon_get_evset(task->envir->esids[task->evset]);
 	int cpuid = smp_processor_id();
 	long long tsc;
 
-	printk("-> smon_sample_start\n");
+	if (!evset) {
+		PDEBUG("smon_sample_start: error: not able to get evset %d\n", task->evset);
+		return;
+	}
 	/*
 	 * If our evset is already configured, don't do it again
 	 * - assumes schedmon is the only tool using HPMCs
 	 */
-	//if (cpu[cpuid].evset != task->evset) {
+
 	smon_pmc_set(evset);
-	cpu[cpuid].evset = task->evset;
-	//}
 
 	/* reload our counter values */
 	smon_pmc_write(&task->sample_pmc.pmc);
@@ -61,8 +62,6 @@ void smon_sample_stop (struct smon_task *task)
 
 	/* Stop Counting */
 	smon_pmc_stop();
-
-	printk("-> smon_sample_stop\n");
 
 	/* Update Timestamps */
 	tsc = msr_rdtsc();
@@ -85,6 +84,7 @@ void smon_sample_save (struct smon_task *task)
 
 	/* Go to Next Evset */
 	task->evset = smon_envir_next_evset(task->envir, task->evset);
+	PDEBUG("smon_sample_save: next evset = %d\n", task->evset);
 }
 
 /*

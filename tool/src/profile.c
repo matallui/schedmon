@@ -331,7 +331,8 @@ int start_profile (char *path, char **argv, struct smon_cmd *cmd)
 		}
 
 		/* Set CPU affinity */
-		smon_set_affinity(getpid(), cmd->cpumask);
+		if (cmd->cpumask > 0)
+			smon_set_affinity(getpid(), cmd->cpumask);
 
 		/* synchronization between parent and child before exec */
 		sem_wait(sem);

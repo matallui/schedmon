@@ -373,6 +373,7 @@ int parse_profile (int argc, char **argv, struct smon_cmd *cmd)
 	envir.sample_time = DEFAULT_SAMPLE_TIME;
 	sprintf (cmd->out_file, "%s", DEFAULT_OFILE);
 	cmd->mmap_pages = DEFAULT_MMAP_PAGES;
+	cmd->cpumask = 0;
 
 
 	while ((c=getopt(argc, argv, "b:c:e:fimo:p:rst:")) != -1)
@@ -403,6 +404,7 @@ int parse_profile (int argc, char **argv, struct smon_cmd *cmd)
 						return ++err;
 					}
 					esids[ntok] = strtoul(token, 0, 0);
+					printf("-> evset[%d] = %d\n", ntok, esids[ntok]);
 
 					if (esids[ntok] >= MAX_EVSETS) {
 						fprintf (stderr, " smon-profile: ESID out of range! (%d)\n", esids[ntok]);
@@ -413,6 +415,7 @@ int parse_profile (int argc, char **argv, struct smon_cmd *cmd)
 				}while ((token=strtok(NULL, ":")));
 
 				envir.n_esids = ntok;
+				printf("n_evsets = %d\n", envir.n_esids);
 				tmp = ntok;
 				for (; ntok; ntok--)
 					envir.esids[ntok-1] = (int)esids[ntok-1];
@@ -556,6 +559,8 @@ int parse_stat (int argc, char **argv, struct smon_cmd *cmd)
 					envir.esids[tmp] = (int)-1;
 
 				envir.n_esids = 1;
+				for (ntok = 1; ntok < MUX_EVSETS; ntok++)
+					envir.esids[ntok] = -1;
 
 				eflag++;
 				break;

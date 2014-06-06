@@ -4,7 +4,7 @@
 #include <linux/slab.h>
 #include <linux/hrtimer.h>
 
-//#define SMON_DEBUG	/* Debug Mode (comment to deactivate)*/
+#define SMON_DEBUG	/* Debug Mode (comment to deactivate)*/
 #include "smon.h"
 
 #define MS_TO_NS(msec)	((msec)*1000000)
@@ -255,10 +255,8 @@ inline static void smon_sched_task_in (struct smon_task *task)
 	/* Start Sampling */
 	if (envir_option_stat(task->envir)) {
 		smon_sample_start(task);
-		printk("smon_sched_in: STAT\n");
 	}
 	else {
-		printk("smon_sched_in: no stat\n");
 		irq_work_queue(&task->irq_start_timer);
 	}
 }
@@ -267,7 +265,6 @@ inline static void smon_sched_task_out (struct smon_task *task)
 {
 	struct hrtimer *timer = &task->timer;
 
-	printk("smon_sched_out\n");
 	/* Stop Counting */
 	smon_sample_stop (task);
 

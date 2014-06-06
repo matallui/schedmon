@@ -34,6 +34,7 @@ struct smon_envir * smon_create_envir (struct smon_envir *envir)
 		new->options &= ~ENVOP_SCHED;	// disable SCHED
 	}
 
+	PDEBUG("smon_create_envir: n_esids = %d\t, esid[0] = %d\n", envir->n_esids, envir->esids[0]);
 	atomic_set(&new->count, 1);
 
 	return new;

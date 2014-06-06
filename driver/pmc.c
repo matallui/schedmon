@@ -1,6 +1,9 @@
 #include <linux/module.h>
 #include <linux/kernel.h>
+
+#define SMON_DEBUG
 #include "smon.h"
+
 
 /* GP Counter Configuration */
 #define IA32_PERFEVTSEL(X)		(0x186+(X))
@@ -41,8 +44,10 @@ inline void smon_pmc_set (struct smon_evset *evset)
 	msr_write(IA32_FIXED_CTR_CTRL, evset->fixed_ctrl);
 	for (i = 0; i < MAX_GP_CTRS; i++) {
 		event = smon_get_event(evset->evids[i]);
-		if (event)
+		if (event) {
+			PDEBUG("smon_pmc_set: %d: 0x%x\n", i, event->perfevtsel);
 			msr_write(IA32_PERFEVTSEL(i), event->perfevtsel);
+		}
 	}
 	/* clear overflows */
 	smon_pmc_clr_overflows();
