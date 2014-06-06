@@ -1,7 +1,7 @@
 #include <linux/module.h>
 #include <linux/kernel.h>
 
-//#define SMON_DEBUG	/* Debug Mode (comment to deactivate)*/
+#define SMON_DEBUG	/* Debug Mode (comment to deactivate)*/
 #include "smon.h"
 
 struct smon_cpu cpu[NR_CPUS];
@@ -32,14 +32,15 @@ void smon_sample_start (struct smon_task *task)
 	int cpuid = smp_processor_id();
 	long long tsc;
 
+	printk("-> smon_sample_start\n");
 	/*
 	 * If our evset is already configured, don't do it again
 	 * - assumes schedmon is the only tool using HPMCs
 	 */
-	if (cpu[cpuid].evset != task->evset) {
-		smon_pmc_set(evset);
-		cpu[cpuid].evset = task->evset;
-	}
+	//if (cpu[cpuid].evset != task->evset) {
+	smon_pmc_set(evset);
+	cpu[cpuid].evset = task->evset;
+	//}
 
 	/* reload our counter values */
 	smon_pmc_write(&task->sample_pmc.pmc);
@@ -60,6 +61,8 @@ void smon_sample_stop (struct smon_task *task)
 
 	/* Stop Counting */
 	smon_pmc_stop();
+
+	printk("-> smon_sample_stop\n");
 
 	/* Update Timestamps */
 	tsc = msr_rdtsc();

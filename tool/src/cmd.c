@@ -13,6 +13,7 @@ event   \tTool for event management.\n   \
 evset   \tTool for even-set management.\n   \
 envir   \tTool for environment management.\n   \
 profile \tTool for profiling (sampling).\n   \
+stat 	\tTool for profiling (total counts)\n   \
 roof    \tTool for statistical counting.\n\n \
 See 'smon COMMAND [help]' for more information on a specific command.\n"
 
@@ -50,6 +51,13 @@ List of 'profile' options:\n   \
 -r            \tdeliver RAPL information at the time granularity of STIME\n   \
 -s            \tdeliver CPU Scheduling information (this might have big overhead)\n   \
 -t TIME_MS    \tsample Time in miliseconds (default is 10)\n\n"
+
+#define STAT_HELP	"\n usage: smon stat -e ESID [[options]] PROG [ARGS...]\n\n \
+List of 'profile' options:\n   \
+-c CPUMASK    \tBind task to specific logical CPUs (e.g., to bind to CPUs 0,1 & 6 -> CPUMASK=0x43)\n   \
+-e ESID       \tEventset to monitor (only one allowed in this mode)\n   \
+-i            \tchildren (recursive) of monitored process will Inherit monitoring\n   \
+-o FILE       \tOutput file (default is 'smon.data')\n\n"
 
 #define ROOF_HELP	"\n usage: smon roof [-c CPUMASK] [-t STIME] [[options]] PROG [ARGS...]\n\n \
 List of 'roof' options:\n   \
@@ -152,6 +160,11 @@ void print_help_evset (void)
 void print_help_profile (void)
 {
 	printf("%s\n", PROFILE_HELP);
+}
+
+void print_help_stat (void)
+{
+	printf("%s\n", STAT_HELP);
 }
 
 void print_help_roof (void)
@@ -481,6 +494,101 @@ int parse_profile (int argc, char **argv, struct smon_cmd *cmd)
 	return err;
 }
 
+int parse_stat (int argc, char **argv, struct smon_cmd *cmd)
+{
+	int			c, ntok, esids[MUX_EVSETS];
+	char			*token;
+	extern char		*optarg;
+	extern int		optind;
+	unsigned int		tmp;
+	int			err = 0;
+
+	int			eflag = 0, oflag = 0;
+
+	/* clean envir configuration */
+	bzero ((void*)&envir, sizeof(struct smon_envir));
+
+	envir.options |= ENVOP_EXE;
+	envir.options |= ENVOP_STAT;
+
+	// Defaults
+	envir.batch_size = 1;
+	envir.sample_time = DEFAULT_SAMPLE_TIME;
+	sprintf (cmd->out_file, "%s", DEFAULT_OFILE);
+	cmd->mmap_pages = 8;
+
+
+	while ((c=getopt(argc, argv, "c:e:io:")) != -1)
+	{
+		switch (c) {
+			case 'c':
+				tmp = strtoul(optarg, 0, 0);
+				cmd->cpumask = tmp;
+				break;
+			case 'e':
+				tmp = 0;
+				ntok = 0;
+				token = strtok (optarg, ":");
+				if (!token) {
+					fprintf (stderr, " smon-stat: No event-sets specified!\n");
+					return ++err;
+				}
+				do {
+					if (ntok == MUX_EVSETS) {
+						fprintf (stderr, " smon-stat: Too many event-sets specified! (max is %d)\n", MUX_EVSETS);
+						return ++err;
+					}
+					esids[ntok] = strtoul(token, 0, 0);
+
+					if (esids[ntok] >= MAX_EVSETS) {
+						fprintf (stderr, " smon-stat: ESID out of range! (%d)\n", esids[ntok]);
+						return ++err;
+					}
+					if (esids[ntok] >= 0) ntok++;
+
+				}while ((token=strtok(NULL, ":")));
+
+				envir.n_esids = ntok;
+				tmp = ntok;
+				for (; ntok; ntok--)
+					envir.esids[ntok-1] = (int)esids[ntok-1];
+				for (; tmp < MUX_EVSETS; tmp++)
+					envir.esids[tmp] = (int)-1;
+
+				envir.n_esids = 1;
+
+				eflag++;
+				break;
+			case 'i':
+				envir.options |= ENVOP_INH;
+				break;
+			case 'o':
+				sprintf(cmd->out_file, "%s", optarg);
+				oflag++;
+				break;
+			default:
+				break;
+		}
+	}
+
+
+	if (optind >= argc) {
+		if (eflag)
+			fprintf (stderr, "smon-stat: argument PROG required for profiling\n");
+		print_help_stat();
+		return ++err;
+	}
+	cmd->argindex = optind+1;
+
+	if (!eflag) {
+		fprintf (stderr, "smon-stat: -e argument required\n");
+		print_help_stat();
+		err++;
+	}
+
+	return err;
+}
+
 int parse_roof (int argc, char **argv, struct smon_cmd *cmd)
 {
 	int			c;
@@ -613,6 +721,11 @@ int smon_parse_input (int argc, char **argv, struct smon_cmd *cmd)
 		cmd->type = CMD_PROFILE;
 		cmd->ptr = (void*)&envir;
 		err = parse_profile(--argc, ++argv, cmd);
+
+	} else if (!strcmp(argv[1], "stat")) {
+		cmd->type = CMD_STAT;
+		cmd->ptr = (void*)&envir;
+		err = parse_stat(--argc, ++argv, cmd);
 
 	} else if (!strcmp(argv[1], "roof")) {
 		cmd->type = CMD_ROOF;

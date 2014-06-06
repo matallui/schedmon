@@ -85,17 +85,17 @@ struct smon_event {
 	union {
 		struct {
 			long long	evsel		: 8,
-					umask		: 8,
-					usr		: 1,
-					os		: 1,
-					edge		: 1,
-					pc		: 1,
-					apic		: 1,
-					any		: 1,
-					en		: 1,
-					inv		: 1,
-					cmask		: 8,
-					reserved	: 32;
+						umask		: 8,
+						usr			: 1,
+						os			: 1,
+						edge		: 1,
+						pc			: 1,
+						apic		: 1,
+						any			: 1,
+						en			: 1,
+						inv			: 1,
+						cmask		: 8,
+						reserved	: 32;
 		};
 		long long		perfevtsel;
 	};
@@ -129,29 +129,29 @@ struct smon_evset {
 	union {
 		struct {
 			long long	fx0_en		: 2,
-					fx0_any		: 1,
-					fx0_pmi		: 1,
-					fx1_en		: 2,
-					fx1_any		: 1,
-					fx1_pmi		: 1,
-					fx2_en		: 2,
-					fx2_any		: 1,
-					fx2_pmi		: 1,
-					reserved	: 52;
+						fx0_any		: 1,
+						fx0_pmi		: 1,
+						fx1_en		: 2,
+						fx1_any		: 1,
+						fx1_pmi		: 1,
+						fx2_en		: 2,
+						fx2_any		: 1,
+						fx2_pmi		: 1,
+						reserved	: 52;
 		};
 		long long		fixed_ctrl;
 	};
 	union {
 		struct {
 			long long	gp_ctr0_en	: 1,
-					gp_ctr1_en	: 1,
-					gp_ctr2_en	: 1,
-					gp_ctr3_en	: 1,
-					reserved_1	: 28,
-					fx_ctr0_en	: 1,
-					fx_ctr1_en	: 1,
-					fx_ctr2_en	: 1,
-					reserved_2	: 29;
+						gp_ctr1_en	: 1,
+						gp_ctr2_en	: 1,
+						gp_ctr3_en	: 1,
+						reserved_1	: 28,
+						fx_ctr0_en	: 1,
+						fx_ctr1_en	: 1,
+						fx_ctr2_en	: 1,
+						reserved_2	: 29;
 		};
 		long long		global_ctrl;
 	};
@@ -184,29 +184,32 @@ extern int smon_check_evset (unsigned int id);
 #define ENVOP_CPU	8
 #define ENVOP_FORK	16
 #define ENVOP_SCHED	32
+#define ENVOP_STAT	64
 
 
 #define DEFAULT_SAMPLE_TIME	10
 
 struct smon_envir {
-	int			esids[MUX_EVSETS];	/* EvSet Ids */
-	unsigned int		n_esids;		/* Number of attached event-sets */
+	int					esids[MUX_EVSETS];	/* EvSet Ids */
+	unsigned int		n_esids;			/* Number of attached event-sets */
 
 	unsigned int		sample_time;		/* Sample Time (if 0, only count) */
-	unsigned int		batch_size;		/* Signal (poll) user each batch_size samples */
+	unsigned int		batch_size;			/* Signal (poll) user each batch_size samples */
 
 	union {
-		unsigned int		inherit		: 1,
-					on_exec		: 1,
-					rapl		: 1,
-					cpu		: 1,
-					fork		: 1,
-					reserved	: 27;
-		unsigned int		options;
+		unsigned int 	inherit		: 1,
+						on_exec		: 1,
+						rapl		: 1,
+						cpu			: 1,
+						fork		: 1,
+						sched 		: 1,
+						stat 		: 1,
+						reserved	: 25;
+		unsigned int	options;
 	};
 
 #ifdef __KERNEL__
-	atomic_t		count;			/* Number or tasks using this envir */
+	atomic_t		count;					/* Number or tasks using this envir */
 #endif /* __KERNEL__ */
 };
 
@@ -237,6 +240,8 @@ extern inline int envir_option_cpu (struct smon_envir *envir);
 extern inline int envir_option_fork (struct smon_envir *envir);
 
 extern inline int envir_option_sched (struct smon_envir *envir);
+
+extern inline int envir_option_stat (struct smon_envir *envir);
 
 
 #endif /* __KERNEL__ */
@@ -453,13 +458,13 @@ struct smon_task {
 	};
 
 	/* Sample Information */
-	struct smon_sample_pmc	sample_pmc;	 /* PMC sample */
-	long long		tsc_tmp;	 /* used to measure sample duration */
-	struct hrtimer		timer;		 /* PMC sampling timer */
-	ktime_t			kt_remain;	 /* remaining time of the current PMC sample */
-	struct irq_work		irq_start_timer; /* Used to start the timer */
-	struct irq_work		irq_stop_timer;	 /* Used to stop the timer */
-	unsigned int		timer_flags;	 /* Used to avoid conflicts between irq and timer interrupts */
+	struct smon_sample_pmc	sample_pmc;			/* PMC sample */
+	long long				tsc_tmp;	 		/* used to measure sample duration */
+	struct hrtimer			timer;		 		/* PMC sampling timer */
+	ktime_t					kt_remain;		 	/* remaining time of the current PMC sample */
+	struct irq_work			irq_start_timer; 	/* Used to start the timer */
+	struct irq_work			irq_stop_timer;	 	/* Used to stop the timer */
+	unsigned int			timer_flags;	 	/* Used to avoid conflicts between irq and timer interrupts */
 
 	struct smon_sample_sched sample_sched;
 
@@ -531,7 +536,7 @@ struct smon_ring_buffer {
 
 	unsigned int	n_pages;			/* total number of data pages */
 	unsigned int	size;				/* n_pages * PAGE_SIZE */
-	void		**data;				/* pages containing sampling information */
+	void			**data;				/* pages containing sampling information */
 	
 	unsigned int	head;				/* writing position */
 	unsigned int	tail;				/* reading position */
@@ -539,8 +544,8 @@ struct smon_ring_buffer {
 	unsigned int	items;				/* number of samples in the buffer */
 	unsigned int	batch;				/* batch size, defined by user (default is 1) */
 
-	spinlock_t	lock;
-	atomic_t	active;				/* number of active writers */
+	spinlock_t		lock;
+	atomic_t		active;				/* number of active writers */
 
 	wait_queue_head_t	inq;			/* wait queue for readers */
 	struct irq_work		irq;			/* delay poll signaling */

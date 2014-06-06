@@ -4,7 +4,7 @@
 #include <linux/slab.h>
 #include <linux/hrtimer.h>
 
-#define SMON_DEBUG	/* Debug Mode (comment to deactivate)*/
+//#define SMON_DEBUG	/* Debug Mode (comment to deactivate)*/
 #include "smon.h"
 
 #define MS_TO_NS(msec)	((msec)*1000000)
@@ -252,18 +252,26 @@ inline static void smon_sched_task_in (struct smon_task *task)
 	if (envir_option_sched(task->envir))
 		smon_sample_sched_in(task);
 
-	/* Start timer & sample ASAP */
-	irq_work_queue(&task->irq_start_timer);
+	/* Start Sampling */
+	if (envir_option_stat(task->envir)) {
+		smon_sample_start(task);
+		printk("smon_sched_in: STAT\n");
+	}
+	else {
+		printk("smon_sched_in: no stat\n");
+		irq_work_queue(&task->irq_start_timer);
+	}
 }
 
 inline static void smon_sched_task_out (struct smon_task *task)
 {
 	struct hrtimer *timer = &task->timer;
 
-	if (hrtimer_active(timer)) {
+	printk("smon_sched_out\n");
+	/* Stop Counting */
+	smon_sample_stop (task);
 
-		/* Stop Counting */
-		smon_sample_stop (task);
+	if (hrtimer_active(timer)) {
 
 		/* Save timer remaining time */
 		task->kt_remain = hrtimer_expires_remaining(&task->timer);
@@ -550,6 +558,8 @@ static void smon_sched_process_exec (void *data, struct task_struct *p, pid_t ol
 		if (task->extra)
 			smon_task_extra_start(task);
 
+		smon_sched_task_in(task);
+
 		spin_lock_irqsave(&sched.cpu_lock[cpu], flags);
 		list_add(&task->cpu_list, &sched.cpu_list[cpu]);
 		spin_unlock_irqrestore(&sched.cpu_lock[cpu], flags);
@@ -576,6 +586,7 @@ static void smon_sched_process_exit (void *data, struct task_struct *p)
 				hrtimer_cancel(&task->timer);
 			/* Stop Counting */
 			smon_sample_stop (task);
+			smon_sample_save (task);
 
 			/* Remove from Run List */
 			list_del(&task->cpu_list);

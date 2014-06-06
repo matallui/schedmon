@@ -25,6 +25,15 @@ struct smon_envir * smon_create_envir (struct smon_envir *envir)
 		new->sample_time = DEFAULT_SAMPLE_TIME;
 	new->batch_size = envir->batch_size;
 	
+	if (envir_option_stat(new))
+	{
+		new->n_esids = 1;				// only 1 event-set in stat mode
+		new->options &= ~ENVOP_RAP;		// disable RAPL
+		new->options &= ~ENVOP_CPU;		// disable Migrations
+		new->options &= ~ENVOP_FORK;	// disable Forks
+		new->options &= ~ENVOP_SCHED;	// disable SCHED
+	}
+
 	atomic_set(&new->count, 1);
 
 	return new;
@@ -99,6 +108,11 @@ inline int envir_option_fork (struct smon_envir *envir)
 inline int envir_option_sched (struct smon_envir *envir)
 {
 	return envir->options & ENVOP_SCHED;
+}
+
+inline int envir_option_stat (struct smon_envir *envir)
+{
+	return envir->options & ENVOP_STAT;
 }
 
 

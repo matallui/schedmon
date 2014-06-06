@@ -69,10 +69,11 @@ int main (int argc, char **argv)
 				}
 				break;
 			case CMD_PROFILE:
+			case CMD_STAT:
 				penvir = (struct smon_envir *)cmd.ptr;
 
 				if ( (ret = smon_check_evsets(penvir) ) != 0) {
-					fprintf (stderr, "smon profile: error: you're trying to add event-sets which aren't available\n");
+					fprintf (stderr, "smon profile/stat: error: you're trying to add event-sets which aren't available\n");
 					break;
 				}
 				ret = start_profile (argv[cmd.argindex], &argv[cmd.argindex], &cmd);
