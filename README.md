@@ -20,7 +20,7 @@ IMPORTANT NOTE: This code has been specifically designed for Linux kernel
                 3.14, so it might not be compatible with other versions.
                 Run at your own risk!
 
-1. EVENTS
+## 1. EVENTS
 
  An event corresponds to the configuration of one and only one performance
 counter (on Intel architectures, it corresponds to a PERFEVTSEL value).
@@ -44,7 +44,7 @@ account in both user and OS modes.
 Note: At the moment, the `smon event -d` functionality is not implemented
 
 
-2. EVENT-SETS
+## 2. EVENT-SETS
 
  An event-set corresponds to a set of events that can be configured into
 the hardware performance interface at the same time. For instance, on
@@ -72,7 +72,7 @@ viously defined events.
 Note: At the moment, the `smon evset -d` functionality is not implemented
 
 
-3. PROFILING
+## 3. PROFILING
 
  SchedMon's profiling functionality allows profiling the required event-
 set(s) in order to evaluate the performance of a target application.
@@ -91,7 +91,7 @@ with sampling time interval of 1ms.
 	smon profile -e 0 -r -t 1 /usr/bin/ls
 
 
-3.1. OUTPUT INFORMATION
+### 3.1. OUTPUT INFORMATION
 
  The output information is saved in `smon.data` by default. This file con-
 tains all the sampling information and the raw values obtained by the
@@ -155,7 +155,7 @@ The following text described the information provided by each sample type.
  -> EUNITS     - Energy Units (used to convert RAPL values into power)
 
 
-4. CACHE-AWARE ROOFLINE MODEL (CARM)
+## 4. CACHE-AWARE ROOFLINE MODEL (CARM)
 
  SchedMon provides a pre-configured command `smon roof` that allows to
 obtain the performance information required for a CARM evalutation.
@@ -170,7 +170,7 @@ This provides the performance information (with 1ms granularity) necessary
 to perform a CARM analysis. Like for profiling, the raw output samples are
 kept in smon.data (by default).
 
-4.1 ADDITIONAL OUTPUT
+### 4.1 ADDITIONAL OUTPUT
 
  In addition to the already described `smon.data` output file, this mode
 provides an additional file `smon.data.roof` which contains the parsed
@@ -187,11 +187,11 @@ information from `smon.data`.
  -> OI      - Operational Intensity
 
 
-5. AUTHORS
+## 5. AUTHORS
 
 <matallui@gmail.com>
 
-6. LICENSE
+## 6. LICENSE
 
  Please refer to the provided 'LICENSE.txt' file.
 
