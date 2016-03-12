@@ -4,7 +4,7 @@
 #include <linux/slab.h>
 #include <linux/hrtimer.h>
 
-#define SMON_DEBUG	/* Debug Mode (comment to deactivate)*/
+//#define SMON_DEBUG	/* Debug Mode (comment to deactivate)*/
 #include "smon.h"
 
 #define MS_TO_NS(msec)	((msec)*1000000)

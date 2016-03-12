@@ -7,7 +7,7 @@
 #include <linux/mm.h>
 #include <linux/sched.h>
 
-#define SMON_DEBUG		/* Debug Mode (comment to deactivate)*/
+//#define SMON_DEBUG		/* Debug Mode (comment to deactivate)*/
 #include "smon.h"
 
 #define SMON_MAJOR 	0	/* dynamic major by default */

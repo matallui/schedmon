@@ -31,6 +31,16 @@ unsigned int count_mode;
 struct smon_sample_rapl rapl_counts;
 struct smon_sample_pmc pmc_counts[MUX_EVSETS];
 
+/*
+ * RDTSC 
+ */
+unsigned long long rdtsc(void) {
+	unsigned a,d;
+
+	__asm__ volatile("rdtsc" : "=a" (a), "=d" (d));
+
+	return ((unsigned long long)a) | (((unsigned long long)d) << 32);
+}
 
 /*
  * Signal Functionality
@@ -49,9 +59,9 @@ void fprint_sample_info (FILE *fp, struct smon_sample_info *sample)
 {
 	/* Frequency is in Hz */
 	fprintf (fp, "[INFO]\t%lld\t%lu\t%u\t%u\t%u\t%u\t%lld\t%lld\t%lld\n",
-		 sample->timestamp, (unsigned long)sample->tsc_frequency*100000000, sample->n_cpus,
-		 sample->pmc_sample_time, sample->rapl_sample_time, sample->evsets,
-		 sample->energy_units, sample->power_units, sample->time_units);
+			sample->timestamp, (unsigned long)sample->tsc_frequency*100000000, sample->n_cpus,
+			sample->pmc_sample_time, sample->rapl_sample_time, sample->evsets,
+			sample->energy_units, sample->power_units, sample->time_units);
 }
 
 void fprint_sample_pmc (FILE *fp, struct smon_sample_pmc *sample)
@@ -59,8 +69,8 @@ void fprint_sample_pmc (FILE *fp, struct smon_sample_pmc *sample)
 	struct smon_pmc *pmc = &sample->pmc;
 
 	fprintf (fp, "[PMC]\t%lld\t%lld\t%lld\t%d\t%d\t%lld\t%lld\t%lld\t%lld\t%lld\t%lld\t%lld\n",
-		sample->timestamp_start, sample->timestamp_stop, sample->duration, sample->pid, sample->evset,
-		pmc->fx[0], pmc->fx[1], pmc->fx[2], pmc->gp[0], pmc->gp[1], pmc->gp[2], pmc->gp[3]);
+			sample->timestamp_start, sample->timestamp_stop, sample->duration, sample->pid, sample->evset,
+			pmc->fx[0], pmc->fx[1], pmc->fx[2], pmc->gp[0], pmc->gp[1], pmc->gp[2], pmc->gp[3]);
 }
 
 void fprint_sample_rapl (FILE *fp, struct smon_sample_rapl *sample)
@@ -68,25 +78,25 @@ void fprint_sample_rapl (FILE *fp, struct smon_sample_rapl *sample)
 	struct smon_rapl *rapl = &sample->rapl;
 
 	fprintf (fp, "[RAPL]\t%lld\t%lld\t%lld\t%lld\t%lld\n",
-		sample->timestamp, sample->duration, rapl->pkg, rapl->pp0, rapl->pp1);
+			sample->timestamp, sample->duration, rapl->pkg, rapl->pp0, rapl->pp1);
 }
 
 void fprint_sample_cpu (FILE *fp, struct smon_sample_cpu *sample)
 {
 	fprintf (fp, "[MIGRATION]\t%lld\t%d\t%d\t%d\n",
-		sample->timestamp, sample->pid, sample->old_cpu, sample->new_cpu);
+			sample->timestamp, sample->pid, sample->old_cpu, sample->new_cpu);
 }
 
 void fprint_sample_sched (FILE *fp, struct smon_sample_sched *sample)
 {
 	fprintf (fp, "[SCHED]\t%lld\t%lld\t%d\t%d\n",
-		 sample->timestamp_in, sample->timestamp_out, sample->pid, sample->cpu);
+			sample->timestamp_in, sample->timestamp_out, sample->pid, sample->cpu);
 }
 
 void fprint_sample_fork (FILE *fp, struct smon_sample_fork *sample)
 {
 	fprintf (fp, "[FORK]\t%lld\t%d\t%d\n",
-		sample->timestamp, sample->parent, sample->child);
+			sample->timestamp, sample->parent, sample->child);
 }
 
 /*
@@ -130,11 +140,11 @@ int read_samples (struct smon_rb *rb, int nr_samples)
 
 	int eof = 0;
 
-//	printf("read_samples: >> TAIL\t%lu\n", (unsigned long)smon_rb_cursor(rb) - (unsigned long)rb->addr);
+	//	printf("read_samples: >> TAIL\t%lu\n", (unsigned long)smon_rb_cursor(rb) - (unsigned long)rb->addr);
 
 	for (n_samples = 0; (n_samples < nr_samples) && !eof; n_samples++)
 	{
-//		printf("read_samples: PTR \t%lu\t\t", (unsigned long)smon_rb_cursor(rb) - (unsigned long)rb->addr);
+		//		printf("read_samples: PTR \t%lu\t\t", (unsigned long)smon_rb_cursor(rb) - (unsigned long)rb->addr);
 
 		sample_header = (struct smon_sample_header *)smon_rb_cursor(rb);
 
@@ -142,7 +152,7 @@ int read_samples (struct smon_rb *rb, int nr_samples)
 
 			case SAMPLE_TYPE_PMC:
 
-//				printf("[PMC]\n");
+				//				printf("[PMC]\n");
 				smon_rb_consume(rb, sizeof(struct smon_sample_header));
 				sample_pmc = (struct smon_sample_pmc *)smon_rb_cursor(rb);
 				fprint_sample_pmc(fp, sample_pmc);
@@ -151,7 +161,7 @@ int read_samples (struct smon_rb *rb, int nr_samples)
 
 			case SAMPLE_TYPE_RAPL:
 
-//				printf("[RAPL]\n");
+				//				printf("[RAPL]\n");
 				smon_rb_consume(rb, sizeof(struct smon_sample_header));
 				sample_rapl = (struct smon_sample_rapl *)smon_rb_cursor(rb);
 				fprint_sample_rapl(fp, sample_rapl);
@@ -160,7 +170,7 @@ int read_samples (struct smon_rb *rb, int nr_samples)
 
 			case SAMPLE_TYPE_CPU:
 
-//				printf("[MIGRATION]\n");
+				//				printf("[MIGRATION]\n");
 				smon_rb_consume(rb, sizeof(struct smon_sample_header));
 				sample_cpu = (struct smon_sample_cpu *)smon_rb_cursor(rb);
 				fprint_sample_cpu(fp, sample_cpu);
@@ -178,7 +188,7 @@ int read_samples (struct smon_rb *rb, int nr_samples)
 
 			case SAMPLE_TYPE_FORK:
 
-//				printf("[FORK]\n");
+				//				printf("[FORK]\n");
 				smon_rb_consume(rb, sizeof(struct smon_sample_header));
 				sample_fork = (struct smon_sample_fork *)smon_rb_cursor(rb);
 				fprint_sample_fork(fp, sample_fork);
@@ -187,7 +197,7 @@ int read_samples (struct smon_rb *rb, int nr_samples)
 
 			case SAMPLE_TYPE_INFO:
 
-//				printf("[INFO]\n");
+				//				printf("[INFO]\n");
 				smon_rb_consume(rb, sizeof(struct smon_sample_header));
 				sample_info = (struct smon_sample_info *)(sample_header + 1);
 				fprint_sample_info(fp, sample_info);
@@ -196,7 +206,7 @@ int read_samples (struct smon_rb *rb, int nr_samples)
 
 			case SAMPLE_TYPE_PAD:
 
-//				printf("[next]\n");
+				//				printf("[next]\n");
 				smon_rb_page_next(rb);
 				n_samples--;
 				break;
@@ -209,7 +219,7 @@ int read_samples (struct smon_rb *rb, int nr_samples)
 
 			default:
 
-//				PDEBUG("smon: read_samples: error: unknown sample header\n");
+				//				PDEBUG("smon: read_samples: error: unknown sample header\n");
 				eof++;
 				n_samples--;
 				return -1;
@@ -218,8 +228,8 @@ int read_samples (struct smon_rb *rb, int nr_samples)
 	}
 
 	bytes = smon_rb_flush(rb);
-//	printf("read_samples: >> PTR \t%lu\n", (unsigned long)smon_rb_cursor(rb) - (unsigned long)rb->addr);
-//	printf("read_samples: READ_COUNT\t%u\n", bytes);
+	//	printf("read_samples: >> PTR \t%lu\n", (unsigned long)smon_rb_cursor(rb) - (unsigned long)rb->addr);
+	//	printf("read_samples: READ_COUNT\t%u\n", bytes);
 	smon_read_samples(n_samples, bytes);
 
 	return 0;
@@ -300,6 +310,14 @@ int start_profile (char *path, char **argv, struct smon_cmd *cmd)
 	char	sem_name[64];
 	char	exec_script[512];
 	struct smon_envir *envir = (struct smon_envir *)cmd->ptr;
+	//long long *start_tsc, stop_tsc;
+
+	/* Mmap tsc_start */
+	//start_tsc = mmap(NULL, sizeof(long long), PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
+	//if (start_tsc == MAP_FAILED) {
+	//	fprintf(stderr, "start_profile: error: mmap tsc failed...\n");
+	//	return -1;
+	//}
 
 	/* Initialize Structures for count_mode */
 	bzero(&rapl_counts, sizeof(struct smon_sample_rapl));
@@ -338,6 +356,8 @@ int start_profile (char *path, char **argv, struct smon_cmd *cmd)
 		sem_wait(sem);
 		sem_close(sem);
 
+		//*start_tsc = rdtsc();
+
 		err += execv (base, argv);
 		if (err) {
 			fprintf (stderr, "smon: start_profile: error: execv: check your program parameters.\n");
@@ -373,15 +393,19 @@ int start_profile (char *path, char **argv, struct smon_cmd *cmd)
 		/* Start Child */
 		sem_post(sem);
 		sem_close(sem);
+		//sprintf(exec_script, "rm -f %s", sem_name);
+		//system(exec_script);
 
 		/* Start Sampling */
 		start_sampling(addr, cmd);
 
 		/* Terminate */
 		wait (NULL);
+		//stop_tsc = rdtsc();
+		//printf("%lld\n", stop_tsc - *start_tsc);
 		smon_unset_task(pid);
 		munmap (addr, cmd->mmap_pages*PAGE_SIZE);
-
+		//munmap (start_tsc, sizeof(long long));
 
 	} else {
 		PDEBUG("smon: start_profile: error: fork()\n");
@@ -397,6 +421,7 @@ int start_profile (char *path, char **argv, struct smon_cmd *cmd)
 		sprintf(exec_script, "/home/matallui/schedmon/scripts/parse_prof.sh %s %s.prof", cmd->out_file, cmd->out_file);
 		system(exec_script);
 	}
+	
 
 	return err;
 }

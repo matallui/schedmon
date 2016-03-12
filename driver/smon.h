@@ -458,13 +458,13 @@ struct smon_task {
 	};
 
 	/* Sample Information */
-	struct smon_sample_pmc	sample_pmc;			/* PMC sample */
-	long long				tsc_tmp;	 		/* used to measure sample duration */
-	struct hrtimer			timer;		 		/* PMC sampling timer */
-	ktime_t					kt_remain;		 	/* remaining time of the current PMC sample */
-	struct irq_work			irq_start_timer; 	/* Used to start the timer */
-	struct irq_work			irq_stop_timer;	 	/* Used to stop the timer */
-	unsigned int			timer_flags;	 	/* Used to avoid conflicts between irq and timer interrupts */
+	struct smon_sample_pmc	sample_pmc;		/* PMC sample */
+	long long		tsc_tmp;		/* used to measure sample duration */
+	struct hrtimer		timer;	 		/* PMC sampling timer */
+	ktime_t			kt_remain;		/* remaining time of the current PMC sample */
+	struct irq_work		irq_start_timer; 	/* Used to start the timer */
+	struct irq_work		irq_stop_timer;	 	/* Used to stop the timer */
+	unsigned int		timer_flags;	 	/* Used to avoid conflicts between irq and timer interrupts */
 
 	struct smon_sample_sched sample_sched;
 

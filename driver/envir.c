@@ -2,7 +2,7 @@
 #include <linux/kernel.h>
 #include <linux/slab.h>
 
-#define SMON_DEBUG	/* Debug Mode (comment to deactivate)*/
+//#define SMON_DEBUG	/* Debug Mode (comment to deactivate)*/
 #include "smon.h"
 
 struct smon_envir * smon_create_envir (struct smon_envir *envir)

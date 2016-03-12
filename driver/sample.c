@@ -1,7 +1,7 @@
 #include <linux/module.h>
 #include <linux/kernel.h>
 
-#define SMON_DEBUG	/* Debug Mode (comment to deactivate)*/
+//#define SMON_DEBUG	/* Debug Mode (comment to deactivate)*/
 #include "smon.h"
 
 struct smon_cpu cpu[NR_CPUS];

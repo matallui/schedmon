@@ -1,7 +1,7 @@
 #include <linux/module.h>
 #include <linux/kernel.h>
 
-#define SMON_DEBUG
+//#define SMON_DEBUG
 #include "smon.h"
 
 

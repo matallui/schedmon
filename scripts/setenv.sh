@@ -46,7 +46,7 @@ $SMON event -a tag=FP_256_PACKED_DOUBLE,evsel=0x11,umask=0x02,mode=3
 $SMON evset -a tag=EVSET_DBL_MEM,events=14:15:21:23,fixed=0x333
 $SMON evset -a tag=EVSET_SSE_AVX,events=22:20:24:25,fixed=0x333
 
-$SMON evset -a tag=EVSET_OVH_1,events=5:6:14:15,fixed=0x333
+$SMON evset -a tag=EVSET_OVH_1,events=14:15:5:6,fixed=0x333
 
 
 # List All

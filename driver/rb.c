@@ -3,7 +3,7 @@
 #include <linux/sched.h>
 #include <linux/slab.h>
 
-#define SMON_DEBUG	/* Debug Mode (comment to toggle)*/
+//#define SMON_DEBUG	/* Debug Mode (comment to toggle)*/
 #include "smon.h"
 
 #define RB_DEFAULT_BATCH		1

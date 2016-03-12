@@ -16,6 +16,9 @@ At the moment, the command-line interface includes 4 sub-commands:
  Using each command without the required parameters will lead SchedMon to
 print some help information.
 
+IMPORTANT NOTE: This code has been specifically designed for Linux kernel
+                3.14, so it might not be compatible with other versions.
+                Run at your own risk!
 
 1. EVENTS
 
@@ -184,6 +187,12 @@ information from `smon.data`.
  -> OI      - Operational Intensity
 
 
-5. FURTHER SUPPORT
+5. AUTHORS
+
+<matallui@gmail.com>
+
+6. LICENSE
+
+ Please refer to the provided 'LICENSE.txt' file.
 
 

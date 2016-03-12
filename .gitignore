@@ -10,3 +10,4 @@ driver/*.com
 driver/.*
 tool/bin/*
 tool/obj/*
+.nfs*

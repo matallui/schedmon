@@ -13,7 +13,7 @@ event   \tTool for event management.\n   \
 evset   \tTool for even-set management.\n   \
 envir   \tTool for environment management.\n   \
 profile \tTool for profiling (sampling).\n   \
-stat 	\tTool for profiling (total counts)\n   \
+stat    \tTool for profiling (total counts)\n   \
 roof    \tTool for statistical counting.\n\n \
 See 'smon COMMAND [help]' for more information on a specific command.\n"
 
@@ -404,7 +404,6 @@ int parse_profile (int argc, char **argv, struct smon_cmd *cmd)
 						return ++err;
 					}
 					esids[ntok] = strtoul(token, 0, 0);
-					printf("-> evset[%d] = %d\n", ntok, esids[ntok]);
 
 					if (esids[ntok] >= MAX_EVSETS) {
 						fprintf (stderr, " smon-profile: ESID out of range! (%d)\n", esids[ntok]);
@@ -415,7 +414,6 @@ int parse_profile (int argc, char **argv, struct smon_cmd *cmd)
 				}while ((token=strtok(NULL, ":")));
 
 				envir.n_esids = ntok;
-				printf("n_evsets = %d\n", envir.n_esids);
 				tmp = ntok;
 				for (; ntok; ntok--)
 					envir.esids[ntok-1] = (int)esids[ntok-1];
